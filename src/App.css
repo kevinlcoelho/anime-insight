@@ -15,7 +15,7 @@
   border-radius: 20px;
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
   width: 100%;
-  max-width: 1400px;
+  max-width: 1200px;
   color: white;
 }
 
@@ -37,6 +37,7 @@
 }
 
 .botao-gerar {
+  min-width: 200px;
   background: linear-gradient(45deg, #9b00d8, #2f00ff);
   color: white;
   border: none;
@@ -44,16 +45,99 @@
   border-radius: 25px;
   font-weight: bold;
   cursor: pointer;
-  transition: transform 0.2s;
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform 0.6s cubic-bezier(0.68, -0.6, 0.32, 1.6),
+    background 0.3s;
+}
+
+.botao-gerar.loading {
+  transform: scale(0.95);
+  background: linear-gradient(45deg, #8600bb, #2000b1);
+}
+
+.botao-gerar.loading::before {
+  animation: brilhoPassando 1200ms linear infinite;
+}
+
+@keyframes brilhoPassando {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+.botao-gerar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(134, 183, 255, 30%),
+    transparent
+  );
+}
+
+.botao-gerar:hover::before {
+  animation: brilhoPassando 1200ms linear infinite;
 }
 
 .botao-gerar:hover {
   transform: scale(1.05);
 }
 
+.botao-gerar:disabled::before {
+  animation: brilhoPassando 1200ms linear infinite;
+}
+
 .botao-gerar:disabled {
-  background: #555;
+  background: linear-gradient(45deg, #8600bb, #2000b1);
   cursor: not-allowed;
+}
+
+.dots-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  height: 20px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  background-color: white;
+  border-radius: 50%;
+  display: inline-block;
+  animation: wave 1.3s linear infinite;
+}
+
+.dot:nth-child(2) {
+  animation-delay: -1.1s;
+}
+
+.dot:nth-child(3) {
+  animation-delay: -0.9s;
+}
+
+@keyframes wave {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.6;
+  }
+  30% {
+    transform: translateY(-6px);
+    opacity: 1;
+  }
 }
 
 .containerAnime {
@@ -66,6 +150,101 @@
   padding: 10px 5px;
   box-sizing: border-box;
   overflow-x: auto;
+  overflow: visible;
+}
+
+.seletor-container {
+  margin-top: 15px;
+  display: flex;
+  justify-content: center;
+}
+
+.gaveta-generos {
+  background: rgba(42, 0, 70, 0.7);
+  color: white;
+  border: 2px solid #9b00d8;
+  padding: 10px 20px;
+  border-radius: 15px;
+  font-weight: bold;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(5px);
+  appearance: none; /* Remove a seta padrão do navegador */
+  text-align: center;
+  min-width: 180px;
+  box-shadow: 0 0 15px rgba(155, 0, 216, 0.2);
+}
+
+.gaveta-generos:hover {
+  border-color: #c156ff;
+  box-shadow: 0 0 20px rgba(0, 210, 255, 0.4);
+}
+
+.gaveta-generos option {
+  background-color: #16001f;
+  color: white;
+}
+
+@keyframes skeletonShimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.skeleton-loading {
+  background: linear-gradient(90deg, #070046 25%, #1a0066 50%, #070046 75%);
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.5s infinite linear;
+  color: transparent !important;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.skeleton-img-placeholder {
+  width: 100%;
+  aspect-ratio: 2/3;
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+
+.skeleton-title-en {
+  width: 70%;
+  height: 20px;
+  margin: 0 auto;
+}
+
+.skeleton-title-jp {
+  width: 40%;
+  height: 12px;
+  margin: 5px auto 0;
+}
+
+.skeleton-data {
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: 5px;
+  height: 14px;
+  border-radius: 4px;
+}
+
+.skeleton-w-ano {
+  width: 40px;
+}
+.skeleton-w-episodios {
+  width: 30px;
+}
+.skeleton-w-rank {
+  width: 35px;
+}
+.skeleton-w-genero {
+  width: 80px;
+}
+.skeleton-w-link {
+  width: 50px;
 }
 
 .cardAnime {
@@ -77,10 +256,51 @@
   display: flex;
   flex-direction: column;
   transition: background 0.3s;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s ease;
+}
+
+@keyframes brilhoPassandoDiagonal {
+  0% {
+    top: -150%;
+    left: -150%;
+  }
+  100% {
+    top: 100%;
+    left: 100%;
+  }
+}
+
+.cardAnime::before {
+  content: '';
+  position: absolute;
+  top: -150%;
+  left: -150%;
+  width: 150%;
+  height: 150%;
+  background: linear-gradient(
+    135deg,
+    transparent,
+    rgba(255, 255, 255, 10%),
+    transparent 65%
+  );
+  width: 200%;
+  height: 200%;
+  top: -200%;
+  left: -200%;
+  pointer-events: none;
+}
+
+.cardAnime:hover::before {
+  animation: brilhoPassandoDiagonal 400ms ease-out forwards;
 }
 
 .cardAnime:hover {
   background: linear-gradient(#0084ff50, #6500a850);
+  transform: scale(1.05);
+  z-index: 10;
+  position: relative;
 }
 
 .cardAnime h3 {

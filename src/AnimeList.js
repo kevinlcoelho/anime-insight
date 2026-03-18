@@ -16,15 +16,13 @@ const tradutorGeneros = {
   Suspense: 'Suspense',
   'Award Winning': 'Premiados',
   Gourmet: 'Culinária',
-  Ecchi: 'Ecchi',
   'Avant Garde': 'Experimental',
-  'Boys Love': 'Boys Love',
-  'Girls Love': 'Girls Love',
 }
 
 function AnimeList() {
   const [animes, setAnimes] = useState([])
   const [loading, setLoading] = useState(false)
+  const [generoSelecionado, setGeneroSelecionado] = useState('')
 
   function embaralhar(array) {
     const novoArray = [...array]
@@ -37,9 +35,34 @@ function AnimeList() {
 
   const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
+  const GENERO_IDS = {
+    Ação: 1,
+    Aventura: 2,
+    Comédia: 4,
+    Drama: 8,
+    Ecchi: 9,
+    Fantasia: 10,
+    Terror: 14,
+    Mistério: 7,
+    Romance: 22,
+    'Ficção Científica': 24,
+    Cotidiano: 36,
+    Esportes: 30,
+    Sobrenatural: 37,
+    Suspense: 41,
+    Premiados: 46,
+    Culinária: 47,
+    Experimental: 5,
+    'Boys Love': 28,
+  }
+
   async function pegarAleatorios() {
     setLoading(true)
     const todasAsPaginas = []
+    const idGenero = generoSelecionado ? GENERO_IDS[generoSelecionado] : ''
+    const baseUrl = idGenero
+      ? `https://api.jikan.moe/v4/anime?genres=${idGenero}&order_by=score&sort=desc`
+      : `https://api.jikan.moe/v4/top/anime?type=tv`
 
     try {
       const paginasAlvo = new Set()
@@ -48,9 +71,7 @@ function AnimeList() {
       }
 
       for (const page of paginasAlvo) {
-        const res = await fetch(
-          `https://api.jikan.moe/v4/top/anime?page=${page}&type=tv`,
-        )
+        const res = await fetch(`${baseUrl}&page=${page}`)
 
         if (res.status === 429) {
           await sleep(1000)
@@ -93,53 +114,106 @@ function AnimeList() {
           <button
             onClick={pegarAleatorios}
             disabled={loading}
-            className="botao-gerar"
+            className={`botao-gerar ${loading ? 'loading' : ''}`}
           >
-            {loading ? 'Carregando...' : 'Gerar novos animes'}
+            {loading ? (
+              <div className="dots-container">
+                <div className="dot"></div>
+                <div className="dot"></div>
+                <div className="dot"></div>
+              </div>
+            ) : (
+              'Gerar novos animes'
+            )}
           </button>
+          <div className="seletor-container">
+            <select
+              className="gaveta-generos"
+              value={generoSelecionado}
+              onChange={(e) => setGeneroSelecionado(e.target.value)}
+            >
+              <option value="">Todos os Gêneros</option>
+              {Object.keys(GENERO_IDS).map((nomeGenero) => (
+                <option key={nomeGenero} value={nomeGenero}>
+                  {nomeGenero}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         <div className="containerAnime">
           {animes.map((anime) => (
             <div key={anime.mal_id} className="cardAnime">
               <h3>
-                <span className="titulo-en">{anime.title}</span>
-                {anime.title_japanese && (
-                  <span className="titulo-jp">{anime.title_japanese}</span>
+                {loading ? (
+                  <>
+                    <div className="skeleton-loading skeleton-title-en"></div>
+                    <div className="skeleton-loading skeleton-title-jp"></div>
+                  </>
+                ) : (
+                  <>
+                    <span className="titulo-en">{anime.title}</span>
+                    {anime.title_japanese && (
+                      <span className="titulo-jp">{anime.title_japanese}</span>
+                    )}
+                  </>
                 )}
               </h3>
-
-              <img
-                src={anime.images?.jpg?.image_url}
-                alt={anime.title}
-                width="200"
-              />
+              {loading ? (
+                <div className="skeleton-loading skeleton-img-placeholder"></div>
+              ) : (
+                <img
+                  src={anime.images?.jpg?.image_url}
+                  alt={anime.title}
+                  width="200"
+                />
+              )}
               <p>
-                📅<span>Ano</span>: {anime.year || 'N/A'}
+                📅<span>Ano</span>:
+                {loading ? (
+                  <div className="skeleton-loading skeleton-data skeleton-w-ano"></div>
+                ) : (
+                  ` ${anime.year || 'N/A'}`
+                )}
               </p>
               <p>
-                🎞️<span>Episódios</span>: {anime.episodes || '?'}
+                🎞️<span>Episódios</span>:
+                {loading ? (
+                  <div className="skeleton-loading skeleton-data skeleton-w-episodios"></div>
+                ) : (
+                  ` ${anime.episodes || '?'}`
+                )}
               </p>
               <p>
-                ⭐<span>Rank</span>: {anime.score || 'Sem nota'}
+                ⭐<span>Rank</span>:{' '}
+                {loading ? (
+                  <div className="skeleton-loading skeleton-data skeleton-w-rank"></div>
+                ) : (
+                  ` ${anime.score || 'Sem nota'}`
+                )}
               </p>
 
               <p>
                 🎭<span>Genêro</span>:{' '}
-                {anime.genres
-                  ?.map((g) => tradutorGeneros[g.name] || g.name)
-                  .join(', ') || 'N/A'}
+                {loading ? (
+                  <div className="skeleton-loading skeleton-data skeleton-w-genero"></div>
+                ) : (
+                  ` ${
+                    anime.genres
+                      ?.map((g) => tradutorGeneros[g.name] || g.name)
+                      .join(', ') || 'N/A'
+                  }`
+                )}
               </p>
 
               <p>
                 🎥<span>Trailer</span>:{' '}
-                {anime.trailer?.url ? (
-                  <a href={anime.trailer.url} target="_blank" rel="noreferrer">
-                    ▶️ Assistir Trailer
-                  </a>
+                {loading ? (
+                  <div className="skeleton-loading skeleton-data skeleton-w-link"></div>
                 ) : (
                   <a
-                    href={`https://www.google.com/search?q=${anime.title}+trailer-original+youtube&btnI`}
+                    href={`https://www.google.com/search?q=${anime.title}+official-trailer-${anime.year}+youtube&btnI`}
                     target="_blank"
                     rel="noreferrer"
                   >
@@ -149,13 +223,11 @@ function AnimeList() {
               </p>
               <p>
                 🎶<span>Opening</span>:{' '}
-                {anime.trailer?.url ? (
-                  <a href={anime.trailer.url} target="_blank" rel="noreferrer">
-                    ▶️ Assistir Opening
-                  </a>
+                {loading ? (
+                  <div className="skeleton-loading skeleton-data skeleton-w-link"></div>
                 ) : (
                   <a
-                    href={`https://www.google.com/search?q=${anime.title}+opening-original+youtube&btnI`}
+                    href={`https://www.google.com/search?q=${anime.title}+official-opening-${anime.year}+youtube&btnI`}
                     target="_blank"
                     rel="noreferrer"
                   >
@@ -165,13 +237,11 @@ function AnimeList() {
               </p>
               <p>
                 🎵<span>Ending</span>:{' '}
-                {anime.trailer?.url ? (
-                  <a href={anime.trailer.url} target="_blank" rel="noreferrer">
-                    ▶️ Assistir Ending
-                  </a>
+                {loading ? (
+                  <div className="skeleton-loading skeleton-data skeleton-w-link"></div>
                 ) : (
                   <a
-                    href={`https://www.google.com/search?q=${anime.title}+ending-original+youtube&btnI`}
+                    href={`https://www.google.com/search?q=${anime.title}+official-ending-${anime.year}+youtube&btnI`}
                     target="_blank"
                     rel="noreferrer"
                   >
