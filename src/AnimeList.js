@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 
 const tradutorGeneros = {
   Action: 'Ação',
@@ -60,31 +60,31 @@ function AnimeList() {
     setAberto(false)
   }
 
-  const GENERO_IDS = {
+  const generoIDS = {
     Ação: 1,
     Aventura: 2,
+    'Boys Love': 28,
     Comédia: 4,
+    Cotidiano: 36,
+    Culinária: 47,
     Drama: 8,
     Ecchi: 9,
-    Fantasia: 10,
-    Terror: 14,
-    Mistério: 7,
-    Romance: 22,
-    'Ficção Científica': 24,
-    Cotidiano: 36,
     Esportes: 30,
+    Experimental: 5,
+    Fantasia: 10,
+    'Ficção Científica': 24,
+    Mistério: 7,
+    Premiados: 46,
+    Romance: 22,
     Sobrenatural: 37,
     Suspense: 41,
-    Premiados: 46,
-    Culinária: 47,
-    Experimental: 5,
-    'Boys Love': 28,
+    Terror: 14,
   }
 
   async function pegarAleatorios() {
     setLoading(true)
     const todasAsPaginas = []
-    const idGenero = generoSelecionado ? GENERO_IDS[generoSelecionado] : ''
+    const idGenero = generoSelecionado ? generoIDS[generoSelecionado] : ''
     const baseUrl = idGenero
       ? `https://api.jikan.moe/v4/anime?genres=${idGenero}&order_by=score&sort=desc`
       : `https://api.jikan.moe/v4/top/anime?type=tv`
@@ -92,7 +92,7 @@ function AnimeList() {
     try {
       const paginasAlvo = new Set()
       while (paginasAlvo.size < 5) {
-        paginasAlvo.add(Math.floor(Math.random() * 10) + 1)
+        paginasAlvo.add(Math.floor(Math.random() * 40) + 1)
       }
 
       for (const page of paginasAlvo) {
@@ -134,8 +134,12 @@ function AnimeList() {
   return (
     <div className="pagina-centralizada">
       <div className="painel-principal">
+        <div className="assinatura">
+          <span className="by">Developed by</span>
+          <span className="nome">Kevin Coelho</span>
+        </div>
         <div className="topo-painel">
-          <h1>Anime Indicator</h1>
+          <h1>Anime Insight</h1>
           <button
             onClick={pegarAleatorios}
             disabled={loading}
@@ -166,7 +170,7 @@ function AnimeList() {
 
               <ul className={`gaveta-lista ${aberto ? 'expandida' : ''}`}>
                 <li onClick={() => selecionarGenero('')}>Todos os Gêneros</li>
-                {Object.keys(GENERO_IDS).map((nomeGenero) => (
+                {Object.keys(generoIDS).map((nomeGenero) => (
                   <li
                     key={nomeGenero}
                     onClick={() => selecionarGenero(nomeGenero)}
@@ -180,129 +184,127 @@ function AnimeList() {
         </div>
 
         <div className="containerAnime">
-          {animes.map((anime) => (
-            <div key={anime.mal_id} className="cardAnime">
-              <h3>
+          {(loading && animes.length === 0 ? Array(6).fill({}) : animes).map(
+            (anime, index) => (
+              <div key={anime.mal_id || index} className="cardAnime">
+                <h3>
+                  {loading ? (
+                    <>
+                      <div className="skeleton-loading skeleton-title-en"></div>
+                      <div className="skeleton-loading skeleton-title-jp"></div>
+                    </>
+                  ) : (
+                    <>
+                      <span className="titulo-en">{anime.title}</span>
+                      {anime.title_japanese && (
+                        <span className="titulo-jp">
+                          {anime.title_japanese}
+                        </span>
+                      )}
+                    </>
+                  )}
+                </h3>
                 {loading ? (
-                  <>
-                    <div className="skeleton-loading skeleton-title-en"></div>
-                    <div className="skeleton-loading skeleton-title-jp"></div>
-                  </>
-                ) : (
-                  <>
-                    <span className="titulo-en">{anime.title}</span>
-                    {anime.title_japanese && (
-                      <span className="titulo-jp">{anime.title_japanese}</span>
-                    )}
-                  </>
-                )}
-              </h3>
-              {loading ? (
-                <div className="skeleton-loading skeleton-img-placeholder"></div>
-              ) : (
-                <img
-                  src={anime.images?.jpg?.image_url}
-                  alt={anime.title}
-                  width="200"
-                />
-              )}
-              <p>
-                📅<span>Ano</span>:
-                {loading ? (
-                  <div className="skeleton-loading skeleton-data skeleton-w-ano"></div>
-                ) : (
-                  ` ${anime.year || 'N/A'}`
-                )}
-              </p>
-              <p>
-                🎞️<span>Episódios</span>:
-                {loading ? (
-                  <div className="skeleton-loading skeleton-data skeleton-w-episodios"></div>
-                ) : (
-                  ` ${anime.episodes || '?'}`
-                )}
-              </p>
-              <p>
-                ⭐<span>Rank</span>:{' '}
-                {loading ? (
-                  <div className="skeleton-loading skeleton-data skeleton-w-rank"></div>
-                ) : (
-                  ` ${anime.score || 'Sem nota'}`
-                )}
-              </p>
-
-              <p>
-                🎭<span>Genêro</span>:{' '}
-                {loading ? (
-                  <div className="skeleton-loading skeleton-data skeleton-w-genero"></div>
-                ) : (
-                  ` ${
-                    anime.genres
-                      ?.map((g) => tradutorGeneros[g.name] || g.name)
-                      .join(', ') || 'N/A'
-                  }`
-                )}
-              </p>
-
-              <p>
-                🎥<span>Trailer</span>:{' '}
-                {loading ? (
-                  <div className="skeleton-loading skeleton-data skeleton-w-link"></div>
+                  <div className="skeleton-loading skeleton-img-placeholder"></div>
                 ) : (
                   <a
                     href={`https://www.google.com/search?q=${anime.title}+official-trailer-${anime.year}+youtube&btnI`}
                     target="_blank"
                     rel="noreferrer"
+                    draggable="false"
                   >
-                    Assistir
+                    <img
+                      src={anime.images?.jpg?.image_url}
+                      alt={anime.title}
+                      width="200"
+                      draggable="false"
+                    />
                   </a>
                 )}
-              </p>
-              <p>
-                🎶<span>Opening</span>:{' '}
-                {loading ? (
-                  <div className="skeleton-loading skeleton-data skeleton-w-link"></div>
-                ) : (
-                  <a
-                    href={`https://www.google.com/search?q=${anime.title}+official-opening-${anime.year}+youtube&btnI`}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    Ouvir
-                  </a>
-                )}
-              </p>
-              <p>
-                🎵<span>Ending</span>:{' '}
-                {loading ? (
-                  <div className="skeleton-loading skeleton-data skeleton-w-link"></div>
-                ) : (
-                  <a
-                    href={`https://www.google.com/search?q=${anime.title}+official-ending-${anime.year}+youtube&btnI`}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    Ouvir
-                  </a>
-                )}
-              </p>
-              {/* <p>
-                <span>Assistir</span>:{' '}
-                {loading ? (
-                  <div className="skeleton-loading skeleton-data skeleton-w-link"></div>
-                ) : (
-                  <a
-                    href={`https://www.crunchyroll.com/pt-br/search?q=${anime.title}`}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    Ouvir
-                  </a>
-                )}
-              </p> */}
-              <hr />
-            </div>
-          ))}
+                <p>
+                  📅<span>Ano</span>:
+                  {loading ? (
+                    <div className="skeleton-loading skeleton-data skeleton-w-ano"></div>
+                  ) : (
+                    ` ${anime.year || 'N/A'}`
+                  )}
+                </p>
+                <p>
+                  🎞️<span>Episódios</span>:
+                  {loading ? (
+                    <div className="skeleton-loading skeleton-data skeleton-w-episodios"></div>
+                  ) : (
+                    ` ${anime.episodes || '?'}`
+                  )}
+                </p>
+                <p>
+                  ⭐<span>Rank</span>:{' '}
+                  {loading ? (
+                    <div className="skeleton-loading skeleton-data skeleton-w-rank"></div>
+                  ) : (
+                    ` ${anime.score || 'Sem nota'}`
+                  )}
+                </p>
+
+                <p>
+                  🎭<span>Genêro</span>:{' '}
+                  {loading ? (
+                    <div className="skeleton-loading skeleton-data skeleton-w-genero"></div>
+                  ) : (
+                    ` ${
+                      anime.genres
+                        ?.map((g) => tradutorGeneros[g.name] || g.name)
+                        .join(', ') || 'N/A'
+                    }`
+                  )}
+                </p>
+
+                <p>
+                  🎥<span>Trailer</span>:{' '}
+                  {loading ? (
+                    <div className="skeleton-loading skeleton-data skeleton-w-link"></div>
+                  ) : (
+                    <a
+                      href={`https://www.google.com/search?q=${anime.title}+official-trailer-${anime.year}+youtube&btnI`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Assistir
+                    </a>
+                  )}
+                </p>
+                <p>
+                  🎶<span>Opening</span>:{' '}
+                  {loading ? (
+                    <div className="skeleton-loading skeleton-data skeleton-w-link"></div>
+                  ) : (
+                    <a
+                      href={`https://www.google.com/search?q=${anime.title}+opening+tv+size+${anime.year}+youtube&btnI`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Ouvir
+                    </a>
+                  )}
+                </p>
+                <p>
+                  🎵<span>Ending</span>:{' '}
+                  {loading ? (
+                    <div className="skeleton-loading skeleton-data skeleton-w-link"></div>
+                  ) : (
+                    <a
+                      href={`https://www.google.com/search?q=${anime.title}+ending+tv+size+${anime.year}+youtube&btnI`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Ouvir
+                    </a>
+                  )}
+                </p>
+                <hr />
+              </div>
+            ),
+          )}
         </div>
       </div>
     </div>
