@@ -97,6 +97,7 @@
   margin: 0 auto;
   color: var(--texto-claro);
   box-sizing: border-box;
+  transition: padding 0.4s ease-in-out;
 }
 
 .topo-painel {
@@ -150,16 +151,29 @@
   align-items: flex-start;
   line-height: 1;
   pointer-events: none;
+  transition:
+    transform 0.4s ease-in-out,
+    top 0.4s ease-in-out,
+    left 0.4s ease-in-out;
+}
+
+@media (max-width: 1024px) {
+  .assinatura {
+    left: 50%;
+    transform: translateX(-50%);
+    align-items: center;
+    top: 15px;
+  }
 }
 
 @media (max-width: 768px) {
   .assinatura {
-    position: static;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    margin-bottom: 15px;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    top: 15px;
+    width: 100%;
+    text-align: center;
   }
 
   .assinatura .by {
@@ -168,6 +182,13 @@
 
   .assinatura .nome {
     font-size: 0.75rem;
+  }
+}
+
+/* Ajuste de padding para compensar assinatura absoluta no 768px */
+@media (max-width: 768px) {
+  .topo-painel {
+    margin-top: 45px;
   }
 }
 
@@ -197,6 +218,7 @@
 
 .botao-gerar {
   width: 230px;
+  max-width: 230px;
   height: 45px;
   flex-shrink: 0;
   background: var(--gradiente-botao);
@@ -210,7 +232,9 @@
   overflow: hidden;
   transition:
     transform 0.6s cubic-bezier(0.68, -0.6, 0.32, 1.6),
-    background 0.3s;
+    background 0.3s,
+    max-width 0.5s ease-in-out,
+    width 0.5s ease-in-out;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -300,8 +324,12 @@
 }
 
 @media (max-width: 1024px) {
+  .painel-principal {
+    padding: 60px 16px 24px 16px;
+  }
+
   .containerAnime {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     row-gap: 35px;
   }
 }
@@ -312,8 +340,9 @@
     row-gap: 35px;
   }
 
-  .botao-gerar::before {
-    animation: brilhoPassando 1200ms linear infinite;
+  .botao-gerar {
+    width: 100%;
+    max-width: 100%;
   }
 }
 
@@ -485,23 +514,22 @@
 .skeleton-title-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
   margin-bottom: 6px;
-  min-height: 52px;
+  width: 100%;
   justify-content: center;
+  align-items: center;
 }
 
 .skeleton-title-en {
   width: 90%;
-  height: 16px;
-  align-self: center;
+  height: 14px;
   border-radius: 4px;
 }
 
 .skeleton-title-jp {
-  width: 60%;
-  height: 11px;
-  align-self: center;
+  width: 70%;
+  height: 10px;
   border-radius: 4px;
 }
 
@@ -512,23 +540,28 @@
 }
 
 .skeleton-w-ano {
-  width: 80px;
+  width: 35px;
+  margin-left: 2px;
 }
 
 .skeleton-w-episodios {
-  width: 80px;
+  width: 20px;
+  margin-left: 2px;
 }
 
 .skeleton-w-rank {
-  width: 80px;
+  width: 25px;
+  margin-left: 2px;
 }
 
 .skeleton-w-genero {
   width: 140px;
+  margin-left: 2px;
 }
 
 .skeleton-w-link {
-  width: 60px;
+  width: 50px;
+  margin-left: 2px;
 }
 
 /* ==========================================================================
@@ -586,7 +619,7 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  height: 52px;
+  min-height: 60px;
   margin: 0 0 10px 0;
   text-align: center;
   margin-bottom: 6px;
