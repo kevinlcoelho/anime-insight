@@ -302,12 +302,14 @@
 @media (max-width: 1024px) {
   .containerAnime {
     grid-template-columns: repeat(4, 1fr);
+    row-gap: 35px;
   }
 }
 
 @media (max-width: 768px) {
   .containerAnime {
     grid-template-columns: repeat(2, 1fr);
+    row-gap: 35px;
   }
 }
 
