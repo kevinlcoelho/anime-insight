@@ -1,5 +1,5 @@
 import './App.css'
-import AnimeList from './AnimeList'
+import AnimeList from './anime-insight'
 
 function App() {
   return (
