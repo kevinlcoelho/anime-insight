@@ -199,34 +199,66 @@ function AnimeList() {
                     </div>
                   </h3>
                   <div className="skeleton-loading skeleton-img-placeholder"></div>
-                  <p>
-                    📅<span>Ano</span>:
-                    <div className="skeleton-loading skeleton-data skeleton-w-ano"></div>
-                  </p>
-                  <p>
-                    🎞️<span>Episódios</span>:
-                    <div className="skeleton-loading skeleton-data skeleton-w-episodios"></div>
-                  </p>
-                  <p>
-                    ⭐<span>Rank</span>:
-                    <div className="skeleton-loading skeleton-data skeleton-w-rank"></div>
-                  </p>
-                  <p>
-                    🎭<span>Gênero</span>:
-                    <div className="skeleton-loading skeleton-data skeleton-w-genero"></div>
-                  </p>
-                  <p>
-                    🎥<span>Trailer</span>:
-                    <div className="skeleton-loading skeleton-data skeleton-w-link"></div>
-                  </p>
-                  <p>
-                    🎶<span>Opening</span>:
-                    <div className="skeleton-loading skeleton-data skeleton-w-link"></div>
-                  </p>
-                  <p>
-                    🎵<span>Ending</span>:
-                    <div className="skeleton-loading skeleton-data skeleton-w-link"></div>
-                  </p>
+                  <div className="info-content">
+                    <div className="stats-row">
+                      <div className="stat-item">
+                        <span className="emoji">📅</span>
+                        <div
+                          className="skeleton-loading skeleton-data skeleton-w-ano"
+                          style={{ width: '35px', height: '14px' }}
+                        ></div>
+                      </div>
+                      <div className="stat-item">
+                        <span className="emoji">🎞️</span>
+                        <div
+                          className="skeleton-loading skeleton-data skeleton-w-episodios"
+                          style={{ width: '25px', height: '14px' }}
+                        ></div>
+                      </div>
+                      <div className="stat-item">
+                        <span className="rank-estrela">⭐</span>
+                        <div
+                          className="skeleton-loading skeleton-data skeleton-w-rank"
+                          style={{ width: '35px', height: '14px' }}
+                        ></div>
+                      </div>
+                    </div>
+                    <div className="genero-container">
+                      <span className="genero-label">🎭</span>
+                      <div
+                        className="skeleton-loading skeleton-data skeleton-w-genero"
+                        style={{ width: '100%', height: '16px' }}
+                      ></div>
+                    </div>
+                    <div className="links-container">
+                      <button
+                        type="button"
+                        className="btn-trailer"
+                        style={{ opacity: 0.5, cursor: 'not-allowed' }}
+                        disabled
+                      >
+                        🎥 Trailer
+                      </button>
+                      <div className="btn-op-ed-container">
+                        <button
+                          type="button"
+                          className="btn-op"
+                          style={{ opacity: 0.5, cursor: 'not-allowed' }}
+                          disabled
+                        >
+                          🎶 Opening
+                        </button>
+                        <button
+                          type="button"
+                          className="btn-ed"
+                          style={{ opacity: 0.5, cursor: 'not-allowed' }}
+                          disabled
+                        >
+                          🎵 Ending
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </>
               ) : (
                 <>
@@ -249,51 +281,64 @@ function AnimeList() {
                       draggable="false"
                     />
                   </a>
-                  <p>
-                    📅<span>Ano</span>: {anime.year || 'Não informado'}
-                  </p>
-                  <p>
-                    🎞️<span>Episódios</span>: {anime.episodes || '?'}
-                  </p>
-                  <p>
-                    ⭐<span>Rank</span>: {anime.score || 'Sem nota'}
-                  </p>
-                  <p>
-                    🎭<span>Gênero</span>:{' '}
-                    {anime.genres
-                      ?.map((g) => tradutorGeneros[g.name] || g.name)
-                      .join(', ') || 'N/A'}
-                  </p>
-                  <p>
-                    🎥<span>Trailer</span>:
-                    <a
-                      href={`https://www.google.com/search?q=${anime.title}+official-trailer-${anime.year}+youtube&btnI`}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      Assistir
-                    </a>
-                  </p>
-                  <p>
-                    🎶<span>Opening</span>:
-                    <a
-                      href={`https://www.google.com/search?q=${anime.title}+opening+tv+size+${anime.year}+youtube&btnI`}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      Ouvir
-                    </a>
-                  </p>
-                  <p>
-                    🎵<span>Ending</span>:
-                    <a
-                      href={`https://www.google.com/search?q=${anime.title}+ending+tv+size+${anime.year}+youtube&btnI`}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      Ouvir
-                    </a>
-                  </p>
+                  <div className="info-content">
+                    <div className="stats-row">
+                      <div className="stat-item">
+                        <span className="emoji">📅</span>
+                        <span className="valor">{anime.year || 'N/A'}</span>
+                      </div>
+                      <div className="stat-item">
+                        <span className="emoji">🎞️</span>
+                        <span className="valor">{anime.episodes || '?'}</span>
+                      </div>
+                      <div className="stat-item">
+                        <span className="rank-estrela">⭐</span>
+                        <span className="valor">
+                          {anime.score
+                            ? Number.isInteger(anime.score)
+                              ? `${anime.score}.0`
+                              : anime.score
+                            : 'N/A'}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="genero-container">
+                      <span className="genero-label">🎭</span>
+                      <p>
+                        {anime.genres
+                          ?.map((g) => tradutorGeneros[g.name] || g.name)
+                          .join(', ') || 'N/A'}
+                      </p>
+                    </div>
+                    <div className="links-container">
+                      <a
+                        href={`https://www.google.com/search?q=${anime.title}+official-trailer-${anime.year}+youtube&btnI`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="btn-trailer"
+                      >
+                        🎥 Trailer
+                      </a>
+                      <div className="btn-op-ed-container">
+                        <a
+                          href={`https://www.google.com/search?q=${anime.title}+opening+tv+size+${anime.year}+youtube&btnI`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="btn-op"
+                        >
+                          🎶 Opening
+                        </a>
+                        <a
+                          href={`https://www.google.com/search?q=${anime.title}+ending+tv+size+${anime.year}+youtube&btnI`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="btn-ed"
+                        >
+                          🎵 Ending
+                        </a>
+                      </div>
+                    </div>
+                  </div>
                 </>
               )}
             </div>
