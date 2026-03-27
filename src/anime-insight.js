@@ -92,7 +92,7 @@ function AnimeList() {
     try {
       const paginasAlvo = new Set()
       while (paginasAlvo.size < 5) {
-        paginasAlvo.add(Math.floor(Math.random() * 5) + 1)
+        paginasAlvo.add(Math.floor(Math.random() * 40) + 1)
       }
 
       for (const page of paginasAlvo) {
