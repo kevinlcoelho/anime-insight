@@ -287,7 +287,10 @@ function AnimeList() {
                     )}
                   </h3>
                   <a
-                    href={`https://www.google.com/search?q=${anime.title}+official-trailer-${anime.year}+youtube&btnI`}
+                    href={
+                      anime.trailer ||
+                      `https://www.google.com/search?q=${anime.title}+official-trailer-${anime.year}+youtube&btnI`
+                    }
                     target="_blank"
                     rel="noreferrer"
                     draggable="false"
