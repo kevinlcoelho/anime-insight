@@ -5,8 +5,10 @@ const tradutorGeneros = {
   Adventure: 'Aventura',
   Comedy: 'Comédia',
   Drama: 'Drama',
+  Ecchi: 'Ecchi',
   Fantasy: 'Fantasia',
   Horror: 'Terror',
+  Music: 'Música',
   Mystery: 'Mistério',
   Romance: 'Romance',
   'Sci-Fi': 'Ficção Científica',
@@ -56,56 +58,68 @@ function AnimeList() {
   const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
   const selecionarGenero = (nome) => {
-    setGeneroSelecionado(nome)
+    const inverso = Object.fromEntries(
+      Object.entries(tradutorGeneros).map(([en, pt]) => [pt, en]),
+    )
+    setGeneroSelecionado(nome === '' ? '' : inverso[nome] || nome)
     setAberto(false)
-  }
-
-  const generoIDS = {
-    Ação: 1,
-    Aventura: 2,
-    'Boys Love': 28,
-    Comédia: 4,
-    Cotidiano: 36,
-    Culinária: 47,
-    Drama: 8,
-    Ecchi: 9,
-    Esportes: 30,
-    Experimental: 5,
-    Fantasia: 10,
-    'Ficção Científica': 24,
-    Mistério: 7,
-    Premiados: 46,
-    Romance: 22,
-    Sobrenatural: 37,
-    Suspense: 41,
-    Terror: 14,
   }
 
   async function pegarAleatorios() {
     setLoading(true)
     const todasAsPaginas = []
-    const idGenero = generoSelecionado ? generoIDS[generoSelecionado] : ''
-    const baseUrl = idGenero
-      ? `https://api.jikan.moe/v4/anime?genres=${idGenero}&order_by=score&sort=desc&type=tv`
-      : `https://api.jikan.moe/v4/top/anime?type=tv`
 
     try {
       const paginasAlvo = new Set()
       while (paginasAlvo.size < 5) {
-        paginasAlvo.add(Math.floor(Math.random() * 40) + 1)
+        paginasAlvo.add(Math.floor(Math.random() * 10) + 1)
       }
 
       for (const page of paginasAlvo) {
-        const res = await fetch(`${baseUrl}&page=${page}`)
+        const query = `
+          query {
+            Page(page: ${page}, perPage: 25) {
+              media(type: ANIME, format: TV, sort: SCORE_DESC${generoSelecionado ? `, genre_in: ["${generoSelecionado}"]` : ''}) {
+                id
+                title { romaji native }
+                coverImage { large }
+                startDate { year }
+                episodes
+                averageScore
+                genres
+                trailer { id site thumbnail }
+              }
+            }
+          }
+        `
 
-        if (res.status === 429) {
-          await sleep(1000)
-          continue
-        }
+        const res = await fetch('https://graphql.anilist.co', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query }),
+        })
 
-        const dados = await res.json()
-        if (dados.data) {
-          todasAsPaginas.push(...dados.data)
+        const json = await res.json()
+        const animesAnilist = json.data?.Page?.media || []
+
+        const convertidos = animesAnilist.map((a) => ({
+          mal_id: a.id,
+          title: a.title.romaji,
+          title_japanese: a.title.native,
+          images: { jpg: { image_url: a.coverImage.large } },
+          year: a.startDate?.year,
+          episodes: a.episodes,
+          score: a.averageScore
+            ? Number((a.averageScore / 10).toFixed(1))
+            : null,
+          genres: (a.genres || []).map((name) => ({ name })),
+          trailer: a.trailer?.id
+            ? `https://www.youtube.com/watch?v=${a.trailer.id}`
+            : null,
+        }))
+
+        if (convertidos.length) {
+          todasAsPaginas.push(...convertidos)
         }
 
         await sleep(350)
@@ -171,7 +185,7 @@ function AnimeList() {
 
               <ul className={`gaveta-lista ${aberto ? 'expandida' : ''}`}>
                 <li onClick={() => selecionarGenero('')}>Todos os Gêneros</li>
-                {Object.keys(generoIDS).map((nomeGenero) => (
+                {Object.values(tradutorGeneros).map((nomeGenero) => (
                   <li
                     key={nomeGenero}
                     onClick={() => selecionarGenero(nomeGenero)}
@@ -312,7 +326,10 @@ function AnimeList() {
                     </div>
                     <div className="links-container">
                       <a
-                        href={`https://www.google.com/search?q=${anime.title}+official-trailer-${anime.year}+youtube&btnI`}
+                        href={
+                          anime.trailer ||
+                          `https://www.google.com/search?q=${anime.title}+official-trailer-${anime.year}+youtube&btnI`
+                        }
                         target="_blank"
                         rel="noreferrer"
                         className="btn-trailer"
